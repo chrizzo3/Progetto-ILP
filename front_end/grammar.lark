@@ -1,0 +1,192 @@
+
+// Grammar for Play language
+// Based on file_md/specifiche_lessicali_e_sintattiche.md
+
+start: program
+
+program: decl_list function_defs main_block GAMEOVER
+
+decl_list: var_decl*
+function_defs: function_def*
+
+main_block: PLAY block
+
+block: LBRACE stmts RBRACE
+
+stmts: stmt*
+
+
+stmt: assign_stmt
+    | if_stat
+    | while_stat
+    | for_stat
+    | input_stat
+    | output_stat
+    | break_stat
+    | func_call_stmt
+    | return_stat
+    | var_decl
+
+var_decl: type COLON var_list
+
+var_list: var_item (COMMA var_item)*
+
+var_item: ID
+        | ID ASSIGN expr
+        | ID EQUALS var_item
+
+type: RANK
+    | RATE
+    | FLAG
+    | LABEL
+
+// Unified lvalue rule to prevent Reduce/Reduce collisions
+lvalue: ID
+      | ID EQUALS lvalue
+
+lvalue_list: lvalue (COMMA lvalue)*
+
+// Assign allows only single lvalue, but we parse as list to avoid conflict
+// and distinguish based on lookahead (GRAB vs expr) after ASSIGN.
+// We verify single-lvalue for assign in post-processing if needed, 
+// or rely on the fact that 'assign' usually implies one. 
+// Given the overlap, we define them sharing the structure.
+
+assign_stmt: lvalue_list ASSIGN expr
+
+input_stat: lvalue_list ASSIGN GRAB expr
+
+
+
+function_def: ACTION ID LPAR param_list RPAR ARROW return_type block
+
+return_type: type | VOID
+
+param_list: (param (COMMA param)*)?
+
+param: type ID
+
+return_stat: REWARD expr
+           | REWARD VOID
+
+output_stat: DROP expr
+
+if_stat: CHOICE LPAR expr RPAR ARROW block elif_stat else_stat
+
+elif_stat: (RETRY LPAR expr RPAR ARROW block elif_stat)?
+
+else_stat: (FAIL ARROW block)?
+
+while_stat: STAY LPAR expr RPAR ARROW block
+
+for_stat: LOOP LPAR assign_stmt SEMI expr SEMI (assign_stmt | expr) RPAR ARROW block
+
+break_stat: QUIT
+
+func_call_stmt: ID LPAR arg_list RPAR
+
+arg_list: (expr (COMMA expr)*)?
+
+// Expressions
+// Using '?' to inline rules and avoid deep ASTs for simple literals
+// Using iterative syntax for left-associativity
+
+?expr: logic_expr
+
+?logic_expr: comp_expr (logic_op comp_expr)*
+
+?comp_expr: sum_expr (comp_op sum_expr)*
+
+?sum_expr: prod_expr (sum_op prod_expr)*
+
+?prod_expr: unary_expr (prod_op unary_expr)*
+
+?unary_expr: unary_op unary_expr
+           | base_expr
+
+?base_expr: LPAR expr RPAR
+          | INTEGER_CONST
+          | REAL_CONST
+          | STRING_CONST
+          | bool_const
+          | ID
+          | func_call_expr
+          | OUT_VAL ID
+
+func_call_expr: ID LPAR arg_list RPAR
+
+!bool_const: TRUE | FALSE
+
+!logic_op: AND | OR
+!comp_op: EQ | NE | LT | LE | GT | GE
+!sum_op: PLUS | MINUS
+!prod_op: MUL | DIV | MOD
+!unary_op: NOT | MINUS | PLUS | OUT_VAL
+
+
+// Lexical Specifications
+// Ordered by priority (longest match first)
+
+PLAY: "play"
+GAMEOVER: "gameover"
+ACTION: "action"
+REWARD: "reward"
+VOID: "void"
+RANK: "rank"
+RATE: "rate"
+FLAG: "flag"
+LABEL: "label"
+TRUE: "true"
+FALSE: "false"
+GRAB: "grab"
+DROP: "drop"
+CHOICE: "choice"
+RETRY: "retry"
+FAIL: "fail"
+STAY: "stay"
+LOOP: "loop"
+QUIT: "quit"
+
+OUT_VAL: "-->"
+ARROW: "->"
+
+ASSIGN: "<--"
+LE: "<="
+NE: "<>"
+LT: "<"
+
+GE: ">="
+GT: ">"
+
+EQ: "=="
+EQUALS: "="
+
+AND: "&&"
+OR: "||"
+NOT: "!"
+
+PLUS: "+"
+MINUS: "-"
+MUL: "*"
+DIV: "/"
+MOD: "%"
+
+LBRACE: "{"
+RBRACE: "}"
+LPAR: "("
+RPAR: ")"
+COMMA: ","
+SEMI: ";"
+COLON: ":"
+
+ID: /[a-zA-Z_][a-zA-Z0-9_]*/
+INTEGER_CONST: /[0-9]+/
+REAL_CONST: /[0-9]+\.[0-9]+/
+STRING_CONST: /"[^"]*"/
+
+COMMENT: /\/\/[^\n]*/
+
+%ignore WS
+%ignore COMMENT
+
+%import common.WS
