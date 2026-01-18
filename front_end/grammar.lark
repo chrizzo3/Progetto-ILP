@@ -104,7 +104,7 @@ arg_list: (expr (COMMA expr)*)?
 ?unary_expr: unary_op unary_expr
            | base_expr
 
-?base_expr: LPAR expr RPAR
+base_expr: LPAR expr RPAR
           | INTEGER_CONST
           | REAL_CONST
           | STRING_CONST

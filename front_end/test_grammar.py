@@ -1,5 +1,7 @@
+import json
 from lark import Lark
 from lark.exceptions import UnexpectedToken, UnexpectedCharacters, VisitError
+from lark import Tree, Token
 
 # Mappa dei token tecnici -> Messaggi umani
 # Basata sui nomi dei token definiti nel file grammar.lark
@@ -18,6 +20,19 @@ TOKEN_MAP = {
     'FLAG': "il tipo 'flag'",
     'LABEL': "il tipo 'label'",
 }
+
+def tree_to_dict(tree):
+    if isinstance(tree, Tree):
+        return {
+            "type": tree.data,  # Nome della regola (es. if_stmt)
+            "children": [tree_to_dict(child) for child in tree.children]
+        }
+    elif isinstance(tree, Token):
+        return {
+            "token": tree.type, # Tipo token (es. ID)
+            "value": tree.value # Valore (es. "score")
+        }
+    return str(tree)
 
 def gestisci_errore(e, code):
     """Funzione universale per formattare gli errori"""
@@ -63,21 +78,41 @@ def gestisci_errore(e, code):
     print("="*40 + "\n")
 
 
+def parsing_code(code, parser):
+    try:
+        tree = parser.parse(code)
+        print("\n✅ Parsing completato con successo!")
+        
+        # Visualizzazione Albero
+        print("\nStruttura dell'albero:")
+        print(tree.pretty())
 
-# 1. Carica la grammatica
-try:
-    with open('grammar.lark', 'r') as f:
-        grammar = f.read()
-    
-    # 'start' deve corrispondere alla tua regola iniziale (di solito 'program' o 'start')
-    parser = Lark(grammar, start='program', parser='lalr')
-    print("✅ Grammatica caricata correttamente (Sintassi .lark valida).")
+        print("\nJSON Output:")
+        json_output = json.dumps(tree_to_dict(tree), indent=2)
+        print(json_output)
 
-except Exception as e:
-    print(f"❌ Errore nel caricamento della grammatica:\n{e}")
-    exit(1)
+    except Exception as e:
+        gestisci_errore(e, code)
 
-# 2. Codice di test (Esempio 1 dal Manuale Play)
+
+def carica_grammatica():
+    try:
+        with open('grammar.lark', 'r') as f:
+            grammar = f.read()
+        
+        # 'start' deve corrispondere alla tua regola iniziale (di solito 'program' o 'start')
+        parser = Lark(grammar, start='program', parser='lalr')
+        print("✅ Grammatica caricata correttamente (Sintassi .lark valida).")
+        return parser # <--- MODIFICA FONDAMENTALE: Restituiamo il parser!
+        
+    except FileNotFoundError:
+        print("❌ Errore: Il file 'grammar.lark' non è stato trovato nella cartella corrente.")
+        sys.exit(1)
+    except Exception as e:
+        print(f"❌ Errore nel caricamento della grammatica:\n{e}")
+        sys.exit(1)
+
+# 1. Codice di test (Esempio 1 dal Manuale Play)
 test_code = """
 rank: d
 rank: score <-- 0
@@ -108,22 +143,7 @@ play {
 }
 gameover
 """
-
-# Prova di Parsing per Esempio 1
-try:
-    tree = parser.parse(test_code)
-    print("\n✅ Parsing completato con successo!")
-    
-    # Visualizzazione Albero
-    print("\nStruttura dell'albero:")
-    print(tree.pretty())
-
-except Exception as e:
-    gestisci_errore(e, test_code)
-
-
-
-# 3. Prova priorità Operatori (Esempio 2)
+# 2. Prova priorità Operatori (Esempio 2)
 test_math = """
 play {
     rank: x <-- 1 + 2 * 3
@@ -131,20 +151,7 @@ play {
 gameover
 """
 
-# Prova di Parsing per Esempio 2
-try:
-    tree = parser.parse(test_math)
-    print("\n✅ Parsing completato con successo!")
-    
-    # Visualizzazione Albero
-    print("\nStruttura dell'albero:")
-    print(tree.pretty())
-
-except Exception as e:
-    gestisci_errore(e, test_math)
-
-
-# 4. Prova stress test
+# 3. Prova stress test
 stress_code = """
 play {
     // 1. Test precedenza logica mista
@@ -163,7 +170,7 @@ play {
         }
     }
 
-    // 4. Test assegnamenti multipli a catena (se supportati)
+    // 4. Test assegnamenti multipli a catena
     rank: a, b, c
     a = b = c <-- 10
 
@@ -172,14 +179,10 @@ play {
 }
 gameover
 """
-# Esegui il parser su questo codice...
-try:
-    tree = parser.parse(stress_code)
-    print("\n✅ Parsing completato con successo!")
-    
-    # Visualizzazione Albero
-    print("\nStruttura dell'albero:")
-    print(tree.pretty())
 
-except Exception as e:
-    gestisci_errore(e, stress_code)
+
+if __name__ == "__main__":
+    parser = carica_grammatica()
+    #parsing_code(test_code, parser)
+    parsing_code(test_math, parser)
+    #parsing_code(stress_code, parser)
