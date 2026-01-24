@@ -1,0 +1,6 @@
+rank: x
+play {
+    x <-- 10
+    drop "Hello World"
+    drop "Stampa di x: " + -->x
+} gameover
