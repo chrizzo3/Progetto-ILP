@@ -53,6 +53,16 @@ def compile_source(source_code):
     except Exception as e:
         raise Exception(f"Unexpected Semantic Error: {e}")
 
+    # 4. Intermediate Code Generation
+    #    - Generate IR
+    
+    # 5. Optimization
+    #    - Optimize the IR (Constant folding, Dead code elimination, etc.)
+    
+    # 6. Final Code Generation / Execution
+    #    - Generate Target Code (Assembly, Machine Code)
+    #    - OR Interpreting: Execute the IR (or AST directly) via an Interpreter
+
     return ast
 
 def print_ast(node, indent=""):
