@@ -1,6 +1,80 @@
-rank: x
+// Esempio completo delle funzionalità del linguaggio Play
+
+rank: global_counter
+rate: pi
+flag: is_active
+label: app_title
+
+// Funzione che calcola l'area di un cerchio
+action calculate_area(rate radius) -> rate {
+    rank: multiplier <-- 1
+    reward radius * radius * 3.14 * multiplier
+}
+
+// Funzione ricorsiva per calcolare il fattoriale
+action factorial(rank n) -> rank {
+    choice (n <= 1) -> {
+        reward 1
+    } fail -> {
+        reward n * factorial(n - 1)
+    }
+}
+
 play {
-    x <-- 10
-    drop "Hello World"
-    drop "Stampa di x: " + -->x
+    // Inizializzazione variabili globali
+    global_counter <-- 0
+    pi <-- 3.14159
+    is_active <-- true
+    app_title <-- "Play Language Demo"
+
+    drop "--- " + app_title + " ---"
+
+    // Test Input/Output con diversi tipi
+    rank: user_input
+    rate: rad, area
+    
+    // Test Strutture di Controllo: Loop
+    drop "Contiamo fino a 5:"
+    loop (global_counter <-- 1; global_counter <= 5; global_counter <-- global_counter + 1) -> {
+        drop "Count: " + -->global_counter
+    }
+
+    // Test Strutture di Controllo: While (Stay)
+    drop "Esempio ciclo Stay:"
+    rank: i
+    i <-- 3
+    stay (i > 0) -> {
+        drop "Countdown: " + -->i
+        i <-- i - 1
+    }
+
+    // Test Funzioni e Chiamate
+    drop "Calcolo area cerchio."
+    rad <-- grab "Inserisci il raggio: "
+    area <-- calculate_area(rad)
+    drop "Raggio: " + -->rad
+    drop "Area calcolata: " + -->area
+
+    // Test Ricorsione
+    drop "Calcolo fattoriale di 5:"
+    rank: fact_res
+    fact_res <-- factorial(5)
+    drop "5! = " + -->fact_res
+
+    // Test Condizionale Complesso
+    drop "Test logica booleana:"
+    flag: cond1, cond2
+    cond1 <-- true
+    cond2 <-- false
+    
+    choice (cond1 && !cond2) -> {
+        drop "Condizione 1 vera e 2 falsa (Corretto)"
+    } retry (cond1 || cond2) -> {
+        drop "Almeno una vera"
+    } fail -> {
+        drop "Nessuna vera"
+    }
+
+    drop "Demo completata."
+
 } gameover

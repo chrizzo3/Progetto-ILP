@@ -45,40 +45,52 @@ class ConstantFoldingOptimizer:
         # Aritmetici
         if node.op == '+':
             self.optimizations_count += 1
-            if 'label' in [l_type, r_type] or 'string' in [l_type, r_type]:
+            if 'label' in [l_type, r_type]:
                 return LiteralNode(str(l_val) + str(r_val), 'label')
-            return LiteralNode(l_val + r_val, 'float' if 'float' in [l_type, r_type] else 'int')
+            result_type = 'rate' if 'rate' in [l_type, r_type] else 'rank'
+            return LiteralNode(l_val + r_val, result_type)
         elif node.op == '-':
             self.optimizations_count += 1
-            return LiteralNode(l_val - r_val, 'float' if 'float' in [l_type, r_type] else 'int')
+            result_type = 'rate' if 'rate' in [l_type, r_type] else 'rank'
+            return LiteralNode(l_val - r_val, result_type)
         elif node.op == '*':
             self.optimizations_count += 1
-            return LiteralNode(l_val * r_val, 'float' if 'float' in [l_type, r_type] else 'int')
+            result_type = 'rate' if 'rate' in [l_type, r_type] else 'rank'
+            return LiteralNode(l_val * r_val, result_type)
         elif node.op == '/':
             if r_val == 0:
                 return node
             self.optimizations_count += 1
+            result_type = 'rate' if 'rate' in [l_type, r_type] else 'rank'
             res = l_val / r_val
-            return LiteralNode(int(res) if 'float' not in [l_type, r_type] else res, 'float' if 'float' in [l_type, r_type] else 'int')
-        elif node.op == '%' and l_type == 'int' and r_type == 'int':
+            return LiteralNode(int(res) if result_type == 'rank' else res, result_type)
+        elif node.op == '%' and l_type == 'rank' and r_type == 'rank':
             if r_val == 0:
                 return node
             self.optimizations_count += 1
-            return LiteralNode(l_val % r_val, 'int')
+            return LiteralNode(l_val % r_val, 'rank')
         
         # Confronto
-        elif node.op in ['<', '<=', '>', '>=', '==']:
+        elif node.op in ['<', '<=', '>', '>=', '==', '<>']:
             self.optimizations_count += 1
-            result = eval(f"{l_val} {node.op} {r_val}")
-            return LiteralNode(result, 'bool')
+            ops = {
+                '<': lambda a, b: a < b,
+                '<=': lambda a, b: a <= b,
+                '>': lambda a, b: a > b,
+                '>=': lambda a, b: a >= b,
+                '==': lambda a, b: a == b,
+                '<>': lambda a, b: a != b
+            }
+            result = ops[node.op](l_val, r_val)
+            return LiteralNode(result, 'flag')
         
         # Logici
-        elif node.op == '&&' and l_type == 'bool' and r_type == 'bool':
+        elif node.op == '&&' and l_type == 'flag' and r_type == 'flag':
             self.optimizations_count += 1
-            return LiteralNode(l_val and r_val, 'bool')
-        elif node.op == '||' and l_type == 'bool' and r_type == 'bool':
+            return LiteralNode(l_val and r_val, 'flag')
+        elif node.op == '||' and l_type == 'flag' and r_type == 'flag':
             self.optimizations_count += 1
-            return LiteralNode(l_val or r_val, 'bool')
+            return LiteralNode(l_val or r_val, 'flag')
         
         return node
     
@@ -95,9 +107,9 @@ class ConstantFoldingOptimizer:
         elif node.op == '+':
             self.optimizations_count += 1
             return node.expr
-        elif node. op == '!' and node.expr.type_tag == 'bool':
+        elif node.op == '!' and node.expr.type_tag == 'flag':
             self.optimizations_count += 1
-            return LiteralNode(not node.expr.value, 'bool')
+            return LiteralNode(not node.expr.value, 'flag')
         
         return node
     

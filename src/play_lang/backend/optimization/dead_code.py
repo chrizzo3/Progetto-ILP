@@ -55,13 +55,13 @@ class DeadCodeEliminationOptimizer:
                 
                 # Prova elif
                 if node.elifs:
-                    for elif_node in node.elifs:
-                        if isinstance(elif_node.condition, LiteralNode) and elif_node.condition.type_tag == 'bool':
+                    for i, elif_node in enumerate(node.elifs):
+                        if isinstance(elif_node.condition, LiteralNode) and elif_node.condition.type_tag == 'flag':
                             if elif_node.condition.value:  # Elif true
                                 return elif_node.block
                         else:
                             # Elif con condizione non costante
-                            remaining_elifs = node.elifs[node.elifs.index(elif_node)+1:]
+                            remaining_elifs = node.elifs[i+1:]
                             return IfNode(elif_node.condition, elif_node.block, remaining_elifs, node.else_block)
                 
                 # Usa else_block

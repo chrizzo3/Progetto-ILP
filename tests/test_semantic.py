@@ -231,5 +231,132 @@ class TestSemanticAnalysis(unittest.TestCase):
         with self.assertRaisesRegex(SemanticError, "Input prompt must be 'label'"):
             self.analyze(code)
 
+    # --- Scope Tests ---
+    
+    def test_global_variable_accessible_from_play(self):
+        """Test that global variables are accessible from play{} block"""
+        code = """
+        rank: global_x <-- 100
+        play {
+            drop -->global_x
+        } gameover
+        """
+        self.analyze(code)  # Should pass without error
+    
+    def test_global_variable_accessible_from_function(self):
+        """Test that global variables are accessible from functions"""
+        code = """
+        rank: global_x <-- 100
+        action test() -> rank {
+            reward global_x
+        }
+        play {
+            rank: result <-- test()
+        } gameover
+        """
+        self.analyze(code)  # Should pass without error
+    
+    def test_local_play_variable_not_accessible_from_function(self):
+        """Test that variables declared in play{} are NOT accessible from functions"""
+        code = """
+        action test() -> rank {
+            reward local_main
+        }
+        play {
+            rank: local_main <-- 10
+            rank: x <-- test()
+        } gameover
+        """
+        with self.assertRaisesRegex(SemanticError, "Variable 'local_main' not defined"):
+            self.analyze(code)
+    
+    def test_local_function_variable_not_accessible_from_play(self):
+        """Test that variables declared in functions are NOT accessible from play{}"""
+        code = """
+        action test() -> void {
+            rank: local_func <-- 42
+            reward void
+        }
+        play {
+            test()
+            drop -->local_func
+        } gameover
+        """
+        with self.assertRaisesRegex(SemanticError, "Variable 'local_func' not defined"):
+            self.analyze(code)
+    
+    def test_shadowing_global_in_play(self):
+        """Test that local variables in play{} can shadow global variables"""
+        code = """
+        rank: x <-- 100
+        play {
+            rank: x <-- 50
+            drop -->x
+        } gameover
+        """
+        self.analyze(code)  # Should pass - shadowing is allowed
+    
+    def test_shadowing_global_in_function(self):
+        """Test that local variables in functions can shadow global variables"""
+        code = """
+        rank: score <-- 100
+        action reset() -> rank {
+            rank: score <-- 0
+            reward score
+        }
+        play {
+            rank: result <-- reset()
+            drop -->result
+        } gameover
+        """
+        self.analyze(code)  # Should pass - shadowing is allowed
+    
+    def test_isolation_between_function_scopes(self):
+        """Test that different functions have isolated scopes"""
+        code = """
+        action func1() -> rank {
+            rank: x <-- 10
+            reward x
+        }
+        action func2() -> rank {
+            rank: x <-- 20
+            reward x
+        }
+        play {
+            rank: a <-- func1()
+            rank: b <-- func2()
+        } gameover
+        """
+        self.analyze(code)  # Should pass - each function has its own scope
+    
+    def test_function_parameter_local_scope(self):
+        """Test that function parameters are local to the function"""
+        code = """
+        action test(rank param) -> rank {
+            reward param
+        }
+        play {
+            rank: x <-- test(10)
+            drop -->param
+        } gameover
+        """
+        with self.assertRaisesRegex(SemanticError, "Variable 'param' not defined"):
+            self.analyze(code)
+    
+    def test_nested_scope_access(self):
+        """Test that inner scopes can access outer scopes"""
+        code = """
+        rank: global_var <-- 100
+        action test() -> rank {
+            rank: local_var <-- 50
+            reward global_var + local_var
+        }
+        play {
+            rank: result <-- test()
+            drop -->global_var
+        } gameover
+        """
+        self.analyze(code)  # Should pass
+
 if __name__ == '__main__':
     unittest.main()

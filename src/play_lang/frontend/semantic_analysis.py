@@ -63,8 +63,10 @@ class SemanticAnalyzer:
         for fun_node in node.functions:
             self.visit(fun_node)
 
-        # 4. Analyze main block
+        # 4. Analyze main block with its own local scope
+        self.symbol_table.enter_scope()  # Create local scope for play{}
         self.visit(node.main_block)
+        self.symbol_table.exit_scope()   # Exit play{} scope
 
     def _register_function(self, node):
         # Check if already defined
@@ -91,7 +93,7 @@ class SemanticAnalyzer:
         if node.expr:
             expr_type = self.visit(node.expr)
             if not self._check_type_compatibility(type_name, expr_type):
-                raise SemanticError(f"Type mismatchin declaration of '{node.name}': expected {type_name}, got {expr_type}")
+                raise SemanticError(f"Type mismatch in declaration of '{node.name}': expected {type_name}, got {expr_type}")
         
         self.symbol_table.define(node.name, type_name, 'var')
 

@@ -102,10 +102,7 @@ arg_list: (expr (COMMA expr)*)?
 ?prod_expr: unary_expr (prod_op unary_expr)*
 
 ?unary_expr: unary_op unary_expr
-           | postfix_expr
-
-?postfix_expr: postfix_expr OUT_VAL
-             | base_expr
+           | base_expr
 
 base_expr: LPAR expr RPAR
           | INTEGER_CONST

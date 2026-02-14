@@ -772,7 +772,7 @@ class LLVMCodeGenerator:
             else:
                 return self.builder.icmp_signed('==', left, right, name="eq_tmp")
         
-        elif node.op == '!=':
+        elif node.op == '<>':
             if is_float:
                 return self.builder.fcmp_ordered('!=', left, right, name="fne_tmp")
             else:
