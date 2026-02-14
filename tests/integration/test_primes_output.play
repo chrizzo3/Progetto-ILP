@@ -1,0 +1,27 @@
+// Test Integration: Numeri Primi
+play {
+    rank: limit <-- 20
+    rank: num <-- 2
+    
+    drop "Numeri primi fino a 20:"
+    
+    stay (num <= limit) -> {
+        rank: is_prime <-- 1
+        rank: divisor <-- 2
+        
+        stay (divisor * divisor <= num) -> {
+            choice (num % divisor == 0) -> {
+                is_prime <-- 0
+                quit
+            }
+            divisor <-- divisor + 1
+        }
+        
+        choice (is_prime == 1) -> {
+            drop "" + -->num
+        }
+        
+        num <-- num + 1
+    }
+}
+gameover

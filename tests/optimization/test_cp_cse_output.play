@@ -1,0 +1,13 @@
+// Test: Copy Propagation + CSE
+play {
+    rank: x <-- 10
+    rank: y <-- x              // CP: y è copia di x
+    rank: sum1 <-- y + 5       // CP: sum1 = x + 5
+    rank: sum2 <-- y + 5       // CSE: sum2 = sum1
+    
+    drop "x=" + -->x
+    drop "y=" + -->y
+    drop "sum1=" + -->sum1
+    drop "sum2=" + -->sum2
+}
+gameover

@@ -1,0 +1,13 @@
+// Test: Calcoli matematici corretti
+play {
+    rank: sum <-- 5 + 3
+    rank: diff <-- 10 - 4
+    rank: prod <-- 6 * 7
+    rank: quot <-- 20 / 4
+    
+    drop "Sum: " + -->sum
+    drop "Diff: " + -->diff
+    drop "Prod: " + -->prod
+    drop "Quot: " + -->quot
+}
+gameover

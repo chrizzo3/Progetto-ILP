@@ -1,0 +1,20 @@
+// Test Integration: Fibonacci
+action fibonacci(rank n) -> rank {
+    choice (n <= 1) -> {
+        reward n
+    }
+    reward fibonacci(n - 1) + fibonacci(n - 2)
+}
+
+play {
+    rank: f0 <-- fibonacci(0)
+    rank: f1 <-- fibonacci(1)
+    rank: f5 <-- fibonacci(5)
+    rank: f10 <-- fibonacci(10)
+    
+    drop "fib(0)=" + -->f0
+    drop "fib(1)=" + -->f1
+    drop "fib(5)=" + -->f5
+    drop "fib(10)=" + -->f10
+}
+gameover

@@ -1,0 +1,14 @@
+// Test: Constant Folding
+play {
+    // Questi dovrebbero essere ottimizzati a compile-time
+    rank: a <-- 2 + 3         // CF-> 5
+    rank: b <-- 10 * 2        // CF-> 20  
+    flag: c <-- 5 > 3         // CF-> true
+    flag: d <-- true && false // CF-> false
+    
+    drop "a=" + -->a
+    drop "b=" + -->b
+    drop "c=" + -->c
+    drop "d=" + -->d
+}
+gameover
