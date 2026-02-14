@@ -274,20 +274,23 @@ class PlayTransformer(Transformer):
     def prod_expr(self, items): return self._binary_op(items)
 
     def unary_expr(self, items):
-        # items: [unary_op, unary_expr] oppure [base_expr]
+        # items: [unary_op, unary_expr] oppure [postfix_expr]
         if len(items) == 1:
             return items[0]
         return UnaryOpNode(str(items[0]), items[1])
+    
+    def postfix_expr(self, items):
+        # items: [postfix_expr, OUT_VAL] oppure [base_expr]
+        if len(items) == 1:
+            return items[0]
+        # Applica l'operatore --> all'espressione a sinistra
+        return UnaryOpNode('-->', items[0])
 
     def base_expr(self, items):
         first = items[0]
         # Gestione parentesi: LPAR expr RPAR
         if isinstance(first, Token) and first.type == 'LPAR':
             return items[1]
-        
-        # Gestione OUT_VAL ID (--> ID)
-        if isinstance(first, Token) and first.type == 'OUT_VAL':
-            return UnaryOpNode('-->', VarAccessNode(str(items[1])))
 
         # Gestione Literals e ID
         if isinstance(first, Token):

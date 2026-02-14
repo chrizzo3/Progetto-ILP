@@ -202,8 +202,6 @@ class SemanticAnalyzer:
         expr_type = self.visit(node.expr)
         self.in_output = False
         
-        if expr_type != 'label':
-             raise SemanticError(f"Output requires 'label', got {expr_type}")
 
     def visit_ReturnNode(self, node):
         if not hasattr(self, 'current_function_ret_type') or self.current_function_ret_type is None:
@@ -294,7 +292,8 @@ class SemanticAnalyzer:
             # Rule 2: Operator --> can only be used in Output (Drop)
             if not getattr(self, 'in_output', False):
                  raise SemanticError("Operator '-->' can only be used in 'drop' statements")
-            return expr_type
+            # The --> operator converts any type to label (string)
+            return 'label'
 
     def visit_FunCallExprNode(self, node):
         return self._check_func_call(node.name, node.args)
