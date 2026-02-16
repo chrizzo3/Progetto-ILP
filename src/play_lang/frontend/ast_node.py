@@ -113,7 +113,7 @@ class UnaryOpNode(ExprNode):
 class LiteralNode(ExprNode):
     def __init__(self, value, type_tag):
         self.value = value
-        self.type_tag = type_tag # 'int', 'float', 'bool', 'string'
+        self.type_tag = type_tag # 'rank', 'rate', 'flag', 'label'
 
 class VarAccessNode(ExprNode):
     def __init__(self, name):

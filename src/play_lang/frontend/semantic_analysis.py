@@ -325,9 +325,11 @@ class SemanticAnalyzer:
     def _check_type_compatibility(self, expected, actual):
         if expected == actual:
             return True
-        # Promotion: rank -> rate (assignment of rank to rate variable is ok?)
-        # Usually: expected=rate, actual=rank is OK.
+        # Promotion: rank -> rate
         if expected == 'rate' and actual == 'rank':
+            return True
+        # Demotion: rate -> rank
+        if expected == 'rank' and actual == 'rate':
             return True
         return False
 
