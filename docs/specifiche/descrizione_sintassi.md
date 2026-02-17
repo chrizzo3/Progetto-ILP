@@ -7,10 +7,10 @@
 ### Struttura Generale
 
 Il programma deve avere necessariamente il blocco principale di esecuzione `play` e termina con la fine del file con la keyword `gameover`.
-Tutte le variabili hanno uno scope globale.
+Tutte le variabili hanno uno scope globale se dichiarate fuori dal blocco play e/o fuori da ogni funzione dichiarata.
 
 ```javascript
-// Dichiarazioni Variabili e/o Definizioni di Funzioni ...
+// Dichiarazioni Variabili Globali e/o Definizioni di Funzioni ...
 
 
 play{ // Blocco principale
@@ -30,9 +30,7 @@ gameover //EOF
 - **label**: Stringhe (`string`).
 - **void**: Tipo nullo.
 
-### Variabili (Scope Globale)
-
-Tutte le variabili sono visibili ovunque.
+### Variabili
 
 #### Dichiarazioni e Assegnazioni di Variabili
 
@@ -55,7 +53,6 @@ rate : a = b <-- 4.5, c <-- 7
 rate : a,b <-- 4.5, c <-- 7
 
 // OPPURE
-
 
 label : a <-- "Hello", c <-- "World"
     // codice...
@@ -123,7 +120,7 @@ action FunzioneVoid(rank points) -> void {
   
   ```javascript
   rank: a
-  loop (a <-- 0; a < 6; a+1) -> {
+  loop (a <-- 0; a < 6; a<--a+1) -> {
       // corpo
   
       quit //break
@@ -194,7 +191,7 @@ play {
     drop "Gioco Iniziato!"
 
     stay (isRunning) -> {
-        rank : inputVal // sarà comunque accessibile da ovunque       
+        rank : inputVal // variabile locale        
         inputVal <-- grab "Inserisci comando (1=Punti, 0=Esci)"
 
         choice (inputVal == 0) -> {
