@@ -2,7 +2,7 @@
 
 In questo documento vengono descritte le regole di semantica statica del linguaggio Play, formulate utilizzando la struttura logica **IF-THEN-ELSE** e facendo riferimento esplicito ai nodi dell'AST definiti in `specifiche_ast.md`.
 
-Assumiamo un **singolo scope globale** e un ambiente (Environment/Tabella dei Simboli) $T$ che mantiene le associazioni tra i nomi delle variabili e i loro tipi.
+Assumiamo un duplice scope (globale e locale) e un ambiente (Environment/Tabella dei Simboli) $T$ che mantiene le associazioni tra i nomi delle variabili e i loro tipi.
 
 ---
 
@@ -31,10 +31,9 @@ Assumiamo un **singolo scope globale** e un ambiente (Environment/Tabella dei Si
 
 **Costrutto Drop, nodo `OutputNode`**:
 
-- **IF** Il tipo dell'espressione `expr` è `label`
+- **IF** L'espressione `expr` è semanticamente valida
   - **THEN** L'istruzione `drop` è valida.
-- **ELSE**
-  - **Errore**: `drop` richiede una stringa (usare concatenazione per stampare altri tipi).
+  - **Nota**: L'istruzione `drop` imposta il contesto `in_output` durante la valutazione dell'espressione, consentendo l'uso dell'operatore `-->` per convertire valori di qualsiasi tipo in stringhe. Non viene imposto un requisito esplicito che l'espressione finale sia di tipo `label`.
 
 ## 4. Operatore di Valore (-->)
 

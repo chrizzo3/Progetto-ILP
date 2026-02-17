@@ -44,7 +44,6 @@ Assign ::= AssignDest "<--" Expr
 
 AssignDest ::= ID
              | ID "=" AssignDest
-
 ```
 
 ```ebnf
@@ -103,7 +102,6 @@ BaseExpr ::= "(" Expr ")"
            | BOOL_CONST
            | ID
            | FuncCallExpr
-           | "-->" ID
 
 LogicOp ::= "&&" | "||"
 CompOp  ::= "==" | "<>" | "<" | "<=" | ">" | ">="
