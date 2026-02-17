@@ -236,7 +236,7 @@ class SemanticAnalyzer:
     def visit_VarAccessNode(self, node):
         info = self.symbol_table.lookup(node.name)
         if not info:
-             raise SemanticError(f"Variable '{node.name}' not defined")
+             raise SemanticError(f"Variable '{node.name}' not declared")
         return info['type']
 
     def visit_BinOpNode(self, node):
