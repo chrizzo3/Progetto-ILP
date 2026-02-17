@@ -1,0 +1,80 @@
+// Test completo per il comando drop
+// Dimostra tutte le forme accettate dal comando drop
+
+play{
+    rank: variabile_numero <-- 1
+    rate: variabile_double <-- 1.5
+    flag: variabile_bool <-- true
+    label: variabile_stringa <-- "ciao"
+    
+    // 1. LETTERALI DIRETTI (senza -->)
+    drop "=== LETTERALI DIRETTI ==="
+    drop "stringa letterale"
+    drop 42
+    drop 3.14
+    drop true
+    drop ""
+    
+    // 2. VARIABILI (tutte richiedono -->)
+    drop "=== VARIABILI CON --> ==="
+    drop -->variabile_numero
+    drop -->variabile_double
+    drop -->variabile_bool
+    drop -->variabile_stringa
+    
+    // 3. CONCATENAZIONE: letterale + variabile
+    drop "=== CONCATENAZIONE ==="
+    drop "numero: " + -->variabile_numero
+    drop "double: " + -->variabile_double
+    drop "bool: " + -->variabile_bool
+    drop "stringa: " + -->variabile_stringa
+    
+    // 4. CONCATENAZIONE: variabile + variabile
+    drop -->variabile_numero + " e " + -->variabile_double
+    drop -->variabile_stringa + " " + -->variabile_stringa
+    
+    // 5. CONCATENAZIONE MULTIPLA
+    drop "a=" + -->variabile_numero + " b=" + -->variabile_double + " c=" + -->variabile_bool
+    
+    // 6. CONCATENAZIONE DI SOLI LETTERALI
+    drop "Hello" + " " + "World"
+    drop "A" + "B" + "C"
+    
+    // 7. ESPRESSIONI ARITMETICHE (richiedono -->)
+    drop "=== ESPRESSIONI ==="
+    drop -->(variabile_numero + variabile_double)
+    drop -->(variabile_numero - 1)
+    drop -->(variabile_numero * 2)
+    drop -->(variabile_double / 2)
+    drop -->(variabile_numero % 2)
+    
+    // 8. ESPRESSIONI DI CONFRONTO
+    drop -->(variabile_numero > 0)
+    drop -->(variabile_double <= 2.0)
+    drop -->(variabile_numero == 1)
+    
+    // 9. ESPRESSIONI LOGICHE
+    drop -->(variabile_bool && true)
+    drop -->(variabile_bool || false)
+    drop -->(true && false)
+    
+    // 10. OPERATORI UNARI SU VARIABILI
+    drop "=== OPERATORI UNARI ==="
+    drop -->(-variabile_numero)
+    drop -->(!variabile_bool)
+    
+    // 11. LETTERALI NEGATIVI (senza -->)
+    drop -42
+    drop -3.14
+    
+    // 12. ESPRESSIONI COMPLESSE
+    drop "=== ESPRESSIONI COMPLESSE ==="
+    drop "somma: " + -->(variabile_numero + variabile_double)
+    drop "confronto: " + -->(5 > 3)
+    drop "logica: " + -->(true && false)
+    
+    // 13. CONCATENAZIONE MOLTO COMPLESSA
+    drop "num=" + -->variabile_numero + " double=" + -->variabile_double + " somma=" + -->(variabile_numero + variabile_double)
+    
+    drop "=== TEST COMPLETATI ==="
+}gameover

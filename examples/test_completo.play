@@ -1,0 +1,246 @@
+// ============================================================================
+// TEST ESAUSTIVO LINGUAGGIO PLAY - Test di tutte le funzionalità
+// ============================================================================
+
+// VARIABILI GLOBALI
+rank: glob_int <-- 42
+rate: glob_rate <-- 3.14
+flag: glob_flag <-- true
+label: glob_str <-- "Hello world"
+
+// FUNZIONI
+action somma(rank a, rank b) -> rank {
+    reward a + b
+}
+
+action media(rank a, rank b) -> rate {
+    rate: sum <-- a + b
+    rate: res <-- sum / 2
+    reward res
+}
+
+// BLOCCO PRINCIPALE
+play {
+    drop "=== TEST ESAUSTIVO LINGUAGGIO PLAY ==="
+    drop ""
+    
+    //  TEST 1: TIPI DI DATI E OPERATORE -->
+    drop "--- TEST 1: TIPI DI DATI ---"
+    drop "Intero: " + -->glob_int
+    drop "Decimale: " + -->glob_rate
+    drop "Booleano: " + -->glob_flag
+    drop "Stringa: " + -->glob_str
+    drop ""
+    
+    //TEST 2: INPUT/OUTPUT
+    drop "--- TEST 2: INPUT/OUTPUT ---"
+    rank: num
+    num <-- grab "Inserisci un numero: "
+    drop "Hai inserito: " + -->num
+    drop ""
+    
+    // TEST 3: OPERATORI ARITMETICI (rank)
+    drop "--- TEST 3: OPERATORI ARITMETICI (RANK) ---"
+    rank: a <-- 10
+    rank: b <-- 3
+    drop "a=" + -->a + " b=" + -->b
+    drop "a + b = " + -->(a + b)
+    drop "a - b = " + -->(a - b)
+    drop "a * b = " + -->(a * b)
+    drop "a / b = " + -->(a / b)
+    drop "a % b = " + -->(a % b)
+    drop ""
+    
+    // TEST 4: OPERATORI ARITMETICI (rate)
+    drop "--- TEST 4: OPERATORI ARITMETICI (RATE) ---"
+    rate: x <-- 10.5
+    rate: y <-- 2.5
+    drop "x=" + -->x + " y=" + -->y
+    drop "x + y = " + -->(x + y)
+    drop "x - y = " + -->(x - y)
+    drop "x * y = " + -->(x * y)
+    drop "x / y = " + -->(x / y)
+    drop "Misto (x + a): " + -->(x + a)
+    drop ""
+    
+    // TEST 5: OPERATORI UNARI
+    drop "--- TEST 5: OPERATORI UNARI ---"
+    rank: pos <-- 5
+    drop "Positivo: " + -->pos
+    drop "Negato: " + -->(-pos)
+    flag: vero <-- true
+    drop "Vero: " + -->vero
+    drop "!vero: " + -->(!vero)
+    drop "!!vero: " + -->(!(!vero))
+    drop ""
+    
+    // TEST 6: OPERATORI DI CONFRONTO
+    drop "--- TEST 6: OPERATORI CONFRONTO ---"
+    rank: v1 <-- 10
+    rank: v2 <-- 20
+    drop "v1=" + -->v1 + " v2=" + -->v2
+    drop "v1 < v2: " + -->(v1 < v2)
+    drop "v1 <= v1: " + -->(v1 <= v1)
+    drop "v2 > v1: " + -->(v2 > v1)
+    drop "v1 >= v1: " + -->(v1 >= v1)
+    drop "v1 == 10: " + -->(v1 == 10)
+    drop "v2 == 20: " + -->(v2 == 20)
+    drop ""
+    
+    // TEST 7: OPERATORI LOGICI
+    drop "--- TEST 7: OPERATORI LOGICI ---"
+    flag: t <-- true
+    flag: f <-- false
+    drop "T && T: " + -->(t && t)
+    drop "T && F: " + -->(t && f)
+    drop "F && F: " + -->(f && f)
+    drop "T || F: " + -->(t || f)
+    drop "F || F: " + -->(f || f)
+    drop "!T: " + -->(!t)
+    drop "!F: " + -->(!f)
+    drop ""
+    
+    // TEST 8: ASSEGNAMENTI
+    drop "--- TEST 8: ASSEGNAMENTI ---"
+    rank: var <-- 100
+    drop "Iniziale: " + -->var
+    var <-- 200
+    drop "Modificato: " + -->var
+    var <-- var + 50
+    drop "Incrementato: " + -->var
+    drop ""
+    
+    // TEST 9: CONCATENAZIONE STRINGHE
+    drop "--- TEST 9: CONCATENAZIONE STRINGHE ---"
+    drop "Semplice: " + "Hello " + "World"
+    rank: n1 <-- 42
+    drop "Con -->: n1=" + -->n1
+    drop "Multipla: " + "A" + "B" + "C"
+    drop ""
+    
+    // TEST 10: WHILE (STAY)
+    drop "--- TEST 10: WHILE (STAY) ---"
+    rank: cnt <-- 0
+    stay (cnt < 5) -> {
+        drop "cnt=" + -->cnt
+        cnt <-- cnt + 1
+    }
+    drop "Fine, cnt=" + -->cnt
+    drop ""
+    
+    // TEST 11: FOR (LOOP)
+    drop "--- TEST 11: FOR (LOOP) ---"
+    rank: i
+    loop (i <-- 0; i < 5; i <-- i + 1) -> {
+        drop "i=" + -->i
+    }
+    drop "Tabellina del 5:"
+    loop (i <-- 1; i <= 5; i <-- i + 1) -> {
+        drop "5x" + -->i + "=" + -->(5 * i)
+    }
+    drop ""
+    
+    // TEST 12: BREAK (QUIT)
+    drop "--- TEST 12: BREAK (QUIT) ---"
+    rank: j <-- 0
+    stay (j < 10) -> {
+        choice (j == 3) -> {
+            drop "Break a j=" + -->j
+            quit
+        } fail -> {
+            drop "j=" + -->j
+            j <-- j + 1
+        }
+    }
+    drop "Dopo loop, j=" + -->j
+    drop ""
+    
+    // TEST 13: IF-ELIF-ELSE
+    drop "--- TEST 13: IF-ELIF-ELSE ---"
+    rank: punteggio <-- 85
+    choice (punteggio >= 90) -> {
+        drop "Voto: A"
+    } retry (punteggio >= 80) -> {
+        drop "Voto: B"
+    } retry (punteggio >= 70) -> {
+        drop "Voto: C"
+    } fail -> {
+        drop "Voto: F"
+    }
+    drop ""
+    
+    // TEST 14: IF ANNIDATI
+    drop "--- TEST 14: IF ANNIDATI ---"
+    rank: eta <-- 25
+    choice (eta >= 18) -> {
+        drop "Maggiorenne"
+        choice (eta >= 65) -> {
+            drop "  Pensionato"
+        } fail -> {
+            drop "  Lavoratore"
+        }
+    } fail -> {
+        drop "Minorenne"
+    }
+    drop ""
+    
+    // TEST 15: FUNZIONI
+    drop "--- TEST 15: FUNZIONI ---"
+    rank: sum_res <-- somma(15, 27)
+    drop "somma(15, 27) = " + -->sum_res
+    
+    rate: avg <-- media(10, 20)
+    drop "media(10, 20) = " + -->avg
+    drop ""
+    
+    // TEST 16: CASI EDGE
+    drop "--- TEST 16: CASI EDGE ---"
+    drop "10 / 1 = " + -->(10 / 1)
+    drop "5 % 5 = " + -->(5 % 5)
+    drop "0 + 5 = " + -->(0 + 5)
+    drop "5 * 0 = " + -->(5 * 0)
+    rank: neg1 <-- -10
+    rank: neg2 <-- -5
+    drop "(-10)+(-5) = " + -->(neg1 + neg2)
+    drop "(-10)*(-5) = " + -->(neg1 * neg2)
+    drop "5 == 5: " + -->(5 == 5)
+    drop ""
+    
+    // TEST 17: ESPRESSIONI COMPLESSE
+    drop "--- TEST 17: ESPRESSIONI COMPLESSE ---"
+    rank: cpx <-- (10 + 5) * 3 - 8 / 2
+    drop "(10+5)*3-8/2 = " + -->cpx
+    flag: logic <-- (true && false) || (true && true)
+    drop "(T&&F)||(T&&T) = " + -->logic
+    flag: comp <-- (5 > 3) && (10 <= 20)
+    drop "(5>3)&&(10<=20) = " + -->comp
+    drop ""
+    
+    // TEST 18: LOOP ANNIDATI
+    drop "--- TEST 18: LOOP ANNIDATI ---"
+    rank: r
+    rank: c
+    drop "Tabella 3x3:"
+    loop (r <-- 1; r <= 3; r <-- r + 1) -> {
+        loop (c <-- 1; c <= 3; c <-- c + 1) -> {
+            drop "  " + -->r + "x" + -->c + "=" + -->(r * c)
+        }
+    }
+    drop ""
+    
+    // TEST 19: CONVERSIONI
+    drop "--- TEST 19: CONVERSIONI IMPLICITE ---"
+    rank: int_v <-- 10
+    rate: flt_v <-- 3.5
+    rate: mix_res <-- int_v + flt_v
+    drop "rank(10) + rate(3.5) = " + -->mix_res
+    flag: cmp_mix <-- int_v > flt_v
+    drop "rank(10) > rate(3.5) = " + -->cmp_mix
+    drop ""
+    
+    // FINE
+    drop "=========================================="
+    drop "TEST COMPLETATI CON SUCCESSO!"
+    drop "=========================================="
+    
+} gameover

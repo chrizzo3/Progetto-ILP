@@ -267,7 +267,7 @@ class TestSemanticAnalysis(unittest.TestCase):
             rank: x <-- test()
         } gameover
         """
-        with self.assertRaisesRegex(SemanticError, "Variable 'local_main' not defined"):
+        with self.assertRaisesRegex(SemanticError, "Variable 'local_main' not declared"):
             self.analyze(code)
     
     def test_local_function_variable_not_accessible_from_play(self):
@@ -282,7 +282,7 @@ class TestSemanticAnalysis(unittest.TestCase):
             drop -->local_func
         } gameover
         """
-        with self.assertRaisesRegex(SemanticError, "Variable 'local_func' not defined"):
+        with self.assertRaisesRegex(SemanticError, "Variable 'local_func' not declared"):
             self.analyze(code)
     
     def test_shadowing_global_in_play(self):
@@ -340,7 +340,7 @@ class TestSemanticAnalysis(unittest.TestCase):
             drop -->param
         } gameover
         """
-        with self.assertRaisesRegex(SemanticError, "Variable 'param' not defined"):
+        with self.assertRaisesRegex(SemanticError, "Variable 'param' not declared"):
             self.analyze(code)
     
     def test_nested_scope_access(self):
