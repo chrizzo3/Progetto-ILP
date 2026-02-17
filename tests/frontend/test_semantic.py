@@ -3,8 +3,9 @@ import sys
 import os
 
 # Add parent directory to path
-# Add src to path
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
+# Add src to path (go up to project root, then to src)
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.join(project_root, 'src'))
 
 from lark import Lark
 from play_lang.frontend.transformer import PlayTransformer
@@ -14,7 +15,8 @@ from play_lang.frontend.semantic_analysis import SemanticAnalyzer, SemanticError
 class TestSemanticAnalysis(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        grammar_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src', 'play_lang', 'frontend', 'grammar.lark')
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        grammar_path = os.path.join(project_root, 'src', 'play_lang', 'frontend', 'grammar.lark')
         with open(grammar_path, 'r') as f:
             grammar_src = f.read()
         cls.parser = Lark(grammar_src, start='program', parser='lalr')

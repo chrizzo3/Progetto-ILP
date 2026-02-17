@@ -1,80 +1,66 @@
-// Esempio completo delle funzionalità del linguaggio Play
+rank: op_choice
+rate: n1, n2, res
+flag: running
 
-rank: global_counter
-rate: pi
-flag: is_active
-label: app_title
-
-// Funzione che calcola l'area di un cerchio
-action calculate_area(rate radius) -> rate {
-    rank: multiplier <-- 1
-    reward radius * radius * 3.14 * multiplier
+// Funzione per la somma
+action add(rate a, rate b) -> rate {
+    reward a + b
 }
 
-// Funzione ricorsiva per calcolare il fattoriale
-action factorial(rank n) -> rank {
-    choice (n <= 1) -> {
-        reward 1
-    } fail -> {
-        reward n * factorial(n - 1)
-    }
+// Funzione per la sottrazione
+action sub(rate a, rate b) -> rate {
+    reward a - b
+}
+
+// Funzione per la moltiplicazione
+action mul(rate a, rate b) -> rate {
+    reward a * b
+}
+
+// Funzione per la divisione
+action div(rate a, rate b) -> rate {
+    reward a / b
 }
 
 play {
-    // Inizializzazione variabili globali
-    global_counter <-- 0
-    pi <-- 3.14159
-    is_active <-- true
-    app_title <-- "Play Language Demo"
-
-    drop "--- " + app_title + " ---"
-
-    // Test Input/Output con diversi tipi
-    rank: user_input
-    rate: rad, area
+    running <-- true
     
-    // Test Strutture di Controllo: Loop
-    drop "Contiamo fino a 5:"
-    loop (global_counter <-- 1; global_counter <= 5; global_counter <-- global_counter + 1) -> {
-        drop "Count: " + -->global_counter
+    // Ciclo principale del programma
+    stay (running) -> {
+        drop "--- MENU CALCOLATRICE SEMPLICE---"
+        drop "1. Addizione"
+        drop "2. Sottrazione"
+        drop "3. Moltiplicazione"
+        drop "4. Divisione"
+        drop "0. Esci"
+        
+        op_choice <-- grab "Seleziona operazione (0-4): "
+
+        choice (op_choice == 0) -> {
+            running <-- false
+            drop "Uscita dal programma."  
+        } retry (op_choice == 1) -> {
+            n1 <-- grab "Inserisci primo numero: "
+            n2 <-- grab "Inserisci secondo numero: "
+            res <-- add(n1, n2)
+            drop "Risultato: " + -->res
+        } retry (op_choice == 2) -> {
+            n1 <-- grab "Inserisci primo numero: "
+            n2 <-- grab "Inserisci secondo numero: "
+            res <-- sub(n1, n2)
+            drop "Risultato: " + -->res
+        } retry (op_choice == 3) -> {
+            n1 <-- grab "Inserisci primo numero: "
+            n2 <-- grab "Inserisci secondo numero: "
+            res <-- mul(n1, n2)
+            drop "Risultato: " + -->res
+        } retry (op_choice == 4) -> {
+            n1 <-- grab "Inserisci primo numero: "
+            n2 <-- grab "Inserisci secondo numero: "
+            res <-- div(n1, n2)
+            drop "Risultato: " + -->res
+        } fail -> {
+            drop "Scelta non valida, riprova."
+        }
     }
-
-    // Test Strutture di Controllo: While (Stay)
-    drop "Esempio ciclo Stay:"
-    rank: i
-    i <-- 3
-    stay (i > 0) -> {
-        drop "Countdown: " + -->i
-        i <-- i - 1
-    }
-
-    // Test Funzioni e Chiamate
-    drop "Calcolo area cerchio."
-    rad <-- grab "Inserisci il raggio: "
-    area <-- calculate_area(rad)
-    drop "Raggio: " + -->rad
-    drop "Area calcolata: " + -->area
-
-    // Test Ricorsione
-    drop "Calcolo fattoriale di 5:"
-    rank: fact_res
-    fact_res <-- factorial(5)
-    drop "5! = " + -->fact_res
-
-    // Test Condizionale Complesso
-    drop "Test logica booleana:"
-    flag: cond1, cond2
-    cond1 <-- true
-    cond2 <-- false
-    
-    choice (cond1 && !cond2) -> {
-        drop "Condizione 1 vera e 2 falsa (Corretto)"
-    } retry (cond1 || cond2) -> {
-        drop "Almeno una vera"
-    } fail -> {
-        drop "Nessuna vera"
-    }
-
-    drop "Demo completata."
-
 } gameover
