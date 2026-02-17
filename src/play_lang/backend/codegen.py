@@ -27,10 +27,7 @@ class LLVMCodeGenerator:
         # Funzione corrente in compilazione
         self.current_function = None
         
-        # Tabella dei simboli (variabili locali e globali)
-        self.symbol_table = {}
-        
-        # Stack per gestire scope annidati
+        # Stack per gestire scope annidati (il primo elemento è lo scope globale)
         self.scope_stack = [{}]
         
         # Stack per gestire i blocchi di uscita dei loop (per break/quit)
