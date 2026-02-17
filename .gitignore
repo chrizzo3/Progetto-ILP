@@ -146,3 +146,6 @@ cython_debug/
 *.swp
 *.swo
 *~
+
+#extension packages
+play_extension/*

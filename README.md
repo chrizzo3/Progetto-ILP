@@ -111,6 +111,10 @@ Progetto-ILP/
 │   │   ├── test_constant_folding_output.expected
 │   │   ├── test_cp_cse_output.play
 │   │   └── test_cp_cse_output.expected
+│   │   ├── test_dead_code_output.play
+│   │   └── test_dead_code_output.expected
+│   │   ├── test_strength_reduction_output.play
+│   │   └── test_strength_reduction_output.expected
 │   │
 │   └── integration/                         # Test end-to-end
 │       ├── test_fibonacci_output.play

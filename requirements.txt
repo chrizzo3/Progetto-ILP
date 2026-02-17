@@ -1,0 +1,7 @@
+# Play Language Compiler - Dipendenze Python
+
+# Parser e Lexer
+lark==1.1.9
+
+# Generazione codice LLVM IR
+llvmlite==0.42.0
