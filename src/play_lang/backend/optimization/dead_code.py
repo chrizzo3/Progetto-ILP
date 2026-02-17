@@ -44,7 +44,7 @@ class DeadCodeEliminationOptimizer:
         node.else_block = self.visit(node.else_block) if node.else_block else None
         
         # Se condizione è letterale booleano
-        if isinstance(node.condition, LiteralNode) and node.condition.type_tag == 'bool':
+        if isinstance(node.condition, LiteralNode) and node.condition.type_tag == 'flag':
             if node.condition.value:  # True
                 # Condizione sempre vera: sostituisci con then_block
                 self.eliminations_count += 1
@@ -77,7 +77,7 @@ class DeadCodeEliminationOptimizer:
         node.block = self.visit(node.block) if node.block else None
         
         # Se condizione sempre falsa, elimina il while
-        if isinstance(node.condition, LiteralNode) and node.condition.type_tag == 'bool':
+        if isinstance(node.condition, LiteralNode) and node.condition.type_tag == 'flag':
             if not node.condition.value:  # False
                 self.eliminations_count += 1
                 return BlockNode([])
@@ -89,7 +89,7 @@ class DeadCodeEliminationOptimizer:
         node.block = self.visit(node.block) if node.block else None
         
         # Se condizione sempre falsa, mantieni solo init
-        if isinstance(node.condition, LiteralNode) and node.condition.type_tag == 'bool':
+        if isinstance(node.condition, LiteralNode) and node.condition.type_tag == 'flag':
             if not node.condition.value:  # False
                 self.eliminations_count += 1
                 if node.init:

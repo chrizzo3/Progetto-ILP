@@ -65,19 +65,19 @@ class StrengthReductionOptimizer:
         """Verifica se è letterale 0."""
         return (isinstance(node, LiteralNode) and 
                 node.value == 0 and 
-                node.type_tag in ['int', 'float'])
+                node.type_tag in ['rank', 'rate'])
     
     def _is_literal_one(self, node):
         """Verifica se è letterale 1."""
         return (isinstance(node, LiteralNode) and 
                 node.value == 1 and 
-                node.type_tag in ['int', 'float'])
+                node.type_tag in ['rank', 'rate'])
     
     def _is_literal_two(self, node):
         """Verifica se è letterale 2."""
         return (isinstance(node, LiteralNode) and 
                 node.value == 2 and 
-                node.type_tag == 'int')
+                node.type_tag in ['rank'])
     
     def visit_BinOpNode(self, node):
         """Applica strength reduction su operazioni binarie."""
@@ -90,10 +90,10 @@ class StrengthReductionOptimizer:
             # x * 0 -> 0
             if self._is_literal_zero(node.right):
                 self.reductions_count += 1
-                return LiteralNode(0, 'int')
+                return LiteralNode(0, 'rank')
             if self._is_literal_zero(node.left):
                 self.reductions_count += 1
-                return LiteralNode(0, 'int')
+                return LiteralNode(0, 'rank')
             
             # x * 1 -> x
             if self._is_literal_one(node.right):
@@ -143,37 +143,37 @@ class StrengthReductionOptimizer:
         # Operatori logici
         elif node.op == '&&':
             # true && x -> x
-            if isinstance(node.left, LiteralNode) and node.left.type_tag == 'bool' and node.left.value:
+            if isinstance(node.left, LiteralNode) and node.left.type_tag == 'flag' and node.left.value:
                 self.reductions_count += 1
                 return node.right
             # x && true -> x  
-            if isinstance(node.right, LiteralNode) and node.right.type_tag == 'bool' and node.right.value:
+            if isinstance(node.right, LiteralNode) and node.right.type_tag == 'flag' and node.right.value:
                 self.reductions_count += 1
                 return node.left
             # false && x -> false
-            if isinstance(node.left, LiteralNode) and node.left.type_tag == 'bool' and not node.left.value:
+            if isinstance(node.left, LiteralNode) and node.left.type_tag == 'flag' and not node.left.value:
                 self.reductions_count += 1
-                return LiteralNode(False, 'bool')
+                return LiteralNode(False, 'flag')
             # x && false -> false
-            if isinstance(node.right, LiteralNode) and node.right.type_tag == 'bool' and not node.right.value:
+            if isinstance(node.right, LiteralNode) and node.right.type_tag == 'flag' and not node.right.value:
                 self.reductions_count += 1
-                return LiteralNode(False, 'bool')
+                return LiteralNode(False, 'flag')
         
         elif node.op == '||':
             # true || x -> true
-            if isinstance(node.left, LiteralNode) and node.left.type_tag == 'bool' and node.left.value:
+            if isinstance(node.left, LiteralNode) and node.left.type_tag == 'flag' and node.left.value:
                 self.reductions_count += 1
-                return LiteralNode(True, 'bool')
+                return LiteralNode(True, 'flag')
             # x || true -> true
-            if isinstance(node.right, LiteralNode) and node.right.type_tag == 'bool' and node.right.value:
+            if isinstance(node.right, LiteralNode) and node.right.type_tag == 'flag' and node.right.value:
                 self.reductions_count += 1
-                return LiteralNode(True, 'bool')
+                return LiteralNode(True, 'flag')
             # false || x -> x
-            if isinstance(node.left, LiteralNode) and node.left.type_tag == 'bool' and not node.left.value:
+            if isinstance(node.left, LiteralNode) and node.left.type_tag == 'flag' and not node.left.value:
                 self.reductions_count += 1
                 return node.right
             # x || false -> x
-            if isinstance(node.right, LiteralNode) and node.right.type_tag == 'bool' and not node.right.value:
+            if isinstance(node.right, LiteralNode) and node.right.type_tag == 'flag' and not node.right.value:
                 self.reductions_count += 1
                 return node.left
         
