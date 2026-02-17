@@ -1,0 +1,36 @@
+// Test: Dead Code Elimination
+play {
+    // 1) Choice con condizione costante true -> solo then_block
+    rank: a <-- 0
+    choice (true) -> {
+        a <-- 10
+    } fail -> {
+        a <-- 99
+    }
+    drop "a=" + -->a
+
+    // 2) Choice con condizione costante false -> solo else_block
+    rank: b <-- 0
+    choice (false) -> {
+        b <-- 99
+    } fail -> {
+        b <-- 20
+    }
+    drop "b=" + -->b
+
+    // 3) Stay con condizione costante false -> eliminato
+    rank: c <-- 30
+    stay (false) -> {
+        c <-- 99
+    }
+    drop "c=" + -->c
+
+    // 4) Loop normale per verifica che il codice funzioni
+    rank: d <-- 0
+    rank: i
+    loop (i <-- 0; i < 3; i <-- i + 1) -> {
+        d <-- d + 1
+    }
+    drop "d=" + -->d
+}
+gameover

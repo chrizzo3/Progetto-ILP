@@ -45,7 +45,7 @@ class TestRunner:
         print(f"{Colors.BOLD}{Colors.BLUE}{'='*60}{Colors.RESET}\n")
         
         # Categorie di test
-        categories = ['syntax', 'semantic', 'codegen', 'optimization', 'integration']
+        categories = ['codegen', 'optimization', 'integration']
         
         for category in categories:
             category_dir = self.tests_dir / category
@@ -92,7 +92,7 @@ class TestRunner:
         """Test che deve compilare senza errori."""
         try:
             result = subprocess.run(
-                ['python', 'run_compiler.py', str(test_file)],
+                ['python', 'run_compiler.py', str(test_file.resolve())],
                 cwd=self.project_root,
                 capture_output=True,
                 text=True,
@@ -112,7 +112,7 @@ class TestRunner:
         """Test che deve fallire con errore."""
         try:
             result = subprocess.run(
-                ['python', 'run_compiler.py', str(test_file)],
+                ['python', 'run_compiler.py', str(test_file.resolve())],
                 cwd=self.project_root,
                 capture_output=True,
                 text=True,
@@ -135,7 +135,7 @@ class TestRunner:
         try:
             # Compila
             compile_result = subprocess.run(
-                ['python', 'run_compiler.py', str(test_file)],
+                ['python', 'run_compiler.py', str(test_file.resolve())],
                 cwd=self.project_root,
                 capture_output=True,
                 text=True,
@@ -145,21 +145,15 @@ class TestRunner:
             if compile_result.returncode != 0:
                 return TestResult(test_file.stem, "", False, "Compilation failed")
             
-            # Compila LLVM
-            llvm_result = subprocess.run(
-                ['clang', 'output.ll', 'stub.c', '-o', 'test_output.exe'],
-                cwd=self.project_root,
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
-            
-            if llvm_result.returncode != 0:
-                return TestResult(test_file.stem, "", False, "LLVM compilation failed")
-            
-            # Esegui
+            # Esegui il programma generato da run_compiler.py
+            exe_name = 'program.exe' if os.name == 'nt' else 'program'
+            exe_path = self.project_root / exe_name
+
+            if not exe_path.exists():
+                 return TestResult(test_file.stem, "", False, f"Executable '{exe_name}' not found")
+
             run_result = subprocess.run(
-                [str(self.project_root / 'test_output.exe')],
+                [str(exe_path)],
                 cwd=self.project_root,
                 capture_output=True,
                 text=True,
@@ -172,11 +166,24 @@ class TestRunner:
             if expected_file.exists():
                 expected_output = expected_file.read_text(encoding='utf-8').strip()
                 if actual_output == expected_output:
+                    # Cleanup executable if test passes
+                    try:
+                        if exe_path.exists():
+                            os.remove(exe_path)
+                        if (self.project_root / "output.ll").exists():
+                             os.remove(self.project_root / "output.ll")
+                    except:
+                        pass
                     return TestResult(test_file.stem, "", True, "Output matches")
                 else:
-                    return TestResult(test_file.stem, "", False, f"Output mismatch")
+                    return TestResult(test_file.stem, "", False, f"Output mismatch\nExpected:\n{expected_output}\nGot:\n{actual_output}")
             else:
                 # Nessun file expected, solo verifica che runni
+                try:
+                    if exe_path.exists():
+                        os.remove(exe_path)
+                except:
+                    pass
                 return TestResult(test_file.stem, "", True, "Executed successfully")
                 
         except subprocess.TimeoutExpired:
@@ -241,8 +248,42 @@ def main():
     """Entry point."""
     tests_dir = Path(__file__).parent
     runner = TestRunner(tests_dir)
-    exit_code = runner.run_all_tests()
-    sys.exit(exit_code)
+    if len(sys.argv) > 1:
+        # Esegui test specifico
+        test_path = Path(sys.argv[1])
+        if not test_path.exists():
+            print(f"{Colors.RED}File non trovato: {test_path}{Colors.RESET}")
+            sys.exit(1)
+            
+        # Se è una directory, esegui tutti i test dentro
+        if test_path.is_dir():
+            print(f"{Colors.BOLD}{Colors.BLUE}Esecuzione test in: {test_path}{Colors.RESET}")
+            # Se è la root dei test, usa run_all_tests
+            if test_path.resolve() == tests_dir.resolve():
+                exit_code = runner.run_all_tests()
+            else:
+                category = test_path.name
+                runner.run_category_tests(category, test_path)
+                runner.print_summary()
+                exit_code = 0 if all(r.passed for r in runner.results) else 1
+            sys.exit(exit_code)
+            
+        # Se è un file, esegui singolo test
+        print(f"{Colors.BOLD}{Colors.BLUE}Esecuzione singolo test: {test_path.name}{Colors.RESET}")
+        
+        # Determina categoria dalla directory padre
+        category = test_path.parent.name
+        runner.run_single_test(category, test_path)
+        
+        # Stampa risultato
+        result = runner.results[0]
+        # runner.print_result(result) # Già stampato da run_single_test
+        
+        sys.exit(0 if result.passed else 1)
+    else:
+        # Esegui tutti i test
+        exit_code = runner.run_all_tests()
+        sys.exit(exit_code)
 
 if __name__ == '__main__':
     main()

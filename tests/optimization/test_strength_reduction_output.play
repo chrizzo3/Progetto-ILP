@@ -1,0 +1,37 @@
+// Test: Strength Reduction
+play {
+    rank: x <-- 7
+
+    // x * 1 -> x
+    rank: a <-- x * 1
+    drop "a=" + -->a
+
+    // x * 0 -> 0
+    rank: b <-- x * 0
+    drop "b=" + -->b
+
+    // x + 0 -> x
+    rank: c <-- x + 0
+    drop "c=" + -->c
+
+    // x - 0 -> x
+    rank: d <-- x - 0
+    drop "d=" + -->d
+
+    // x / 1 -> x
+    rank: e <-- x / 1
+    drop "e=" + -->e
+
+    // x * 2 -> x + x
+    rank: f <-- x * 2
+    drop "f=" + -->f
+
+    // true && flag -> flag (identity)
+    flag: g <-- true && true
+    drop "g=" + -->g
+
+    // false || flag -> flag (identity)
+    flag: h <-- false || true
+    drop "h=" + -->h
+}
+gameover

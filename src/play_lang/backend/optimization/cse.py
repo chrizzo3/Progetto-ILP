@@ -132,10 +132,12 @@ class CSEOptimizer:
         return node
     
     def _invalidate_expressions_using(self, var_name):
-        """Invalida espressioni che dipendono da una variabile."""
+        """Invalida espressioni che dipendono O usano come cache una variabile."""
         to_remove = []
         for expr_hash, cached_var in self.expressions.items():
-            if self._expr_uses_var(expr_hash, var_name):
+            # Se l'espressione usa la variabile, OPPURE se la variabile salvata
+            # come cache è proprio quella modificata, dobbiamo invalidare.
+            if cached_var == var_name or self._expr_uses_var(expr_hash, var_name):
                 to_remove.append(expr_hash)
         
         for expr_hash in to_remove:
