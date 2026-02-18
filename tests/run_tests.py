@@ -8,6 +8,7 @@ import os
 import sys
 import subprocess
 import json
+import unittest
 from pathlib import Path
 from dataclasses import dataclass
 from typing import List, Dict, Optional
@@ -44,7 +45,10 @@ class TestRunner:
         print(f"{Colors.BOLD}{Colors.BLUE}  Play Compiler Test Suite{Colors.RESET}")
         print(f"{Colors.BOLD}{Colors.BLUE}{'='*60}{Colors.RESET}\n")
         
-        # Categorie di test
+        # Frontend unit tests
+        self.run_frontend_tests()
+
+        # Categorie di test basati su file .play
         categories = ['codegen', 'optimization', 'integration']
         
         for category in categories:
@@ -54,6 +58,63 @@ class TestRunner:
         
         self.print_summary()
         
+    def run_frontend_tests(self):
+        """Esegue i test unittest nella cartella tests/frontend/."""
+        frontend_dir = self.tests_dir / 'frontend'
+        if not frontend_dir.exists():
+            return
+
+        print(f"\n{Colors.BOLD}{Colors.CYAN}[FRONTEND]{Colors.RESET}")
+        print(f"{'-'*60}")
+
+        src_path = str(self.project_root / 'src')
+        if src_path not in sys.path:
+            sys.path.insert(0, src_path)
+
+        loader = unittest.TestLoader()
+        suite = loader.discover(str(frontend_dir), pattern='test_*.py')
+
+        # Raccoglie tutte le classi di test per eseguirle per classe
+        # (necessario affinché setUpClass venga chiamato correttamente)
+        test_classes = {}
+        for group in suite:
+            for subgroup in group:
+                tests = list(subgroup) if isinstance(subgroup, unittest.TestSuite) else [subgroup]
+                for test in tests:
+                    cls = type(test)
+                    test_classes.setdefault(cls, []).append(test)
+
+        for cls, tests in test_classes.items():
+            class_suite = unittest.TestSuite(tests)
+
+            class _PerTestResult(unittest.TestResult):
+                def __init__(self_inner):
+                    super().__init__()
+                    self_inner.per_test = {}
+
+                def addSuccess(self_inner, test):
+                    self_inner.per_test[test] = ('pass', '')
+
+                def addFailure(self_inner, test, err):
+                    msg = self_inner._exc_info_to_string(err, test).strip().splitlines()[-1]
+                    self_inner.per_test[test] = ('fail', msg)
+
+                def addError(self_inner, test, err):
+                    msg = self_inner._exc_info_to_string(err, test).strip().splitlines()[-1]
+                    self_inner.per_test[test] = ('error', msg)
+
+            buf = _PerTestResult()
+            class_suite.run(buf)
+
+            for test in tests:
+                display_name = f"{cls.__name__}.{test._testMethodName}"
+                status, msg = buf.per_test.get(test, ('pass', ''))
+                passed = (status == 'pass')
+                label = 'OK' if passed else f"{'ERROR' if status == 'error' else 'FAIL'}: {msg}"
+                result = TestResult(display_name, 'frontend', passed, label)
+                self.results.append(result)
+                self.print_result(result)
+
     def run_category_tests(self, category: str, category_dir: Path):
         """Esegue tutti i test in una categoria."""
         print(f"\n{Colors.BOLD}{Colors.CYAN}[{category.upper()}]{Colors.RESET}")
